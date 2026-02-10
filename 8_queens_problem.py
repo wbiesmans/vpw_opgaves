@@ -1,23 +1,20 @@
-import numpy as np
-
-
 class ChessBoard:
     def __init__(self, size):
         self.size = size
 
         # 0: empty, 1: queen, -1: attacked
-        self.board = np.zeros((size, size), dtype=int)
+        self.board = [[0 for _ in range(size)] for _ in range(size)]
         self.queen_positions = []
 
     def return_copy(self):
         new_board = ChessBoard(self.size)
-        new_board.board = self.board.copy()
+        new_board.board = [row[:] for row in self.board]
         new_board.queen_positions = self.queen_positions.copy()
         return new_board
 
     def add_queen(self, row, col):
         if self.is_safe(row, col):
-            self.board[row, col] = 1
+            self.board[row][col] = 1
             self.queen_positions.append((row, col))  # For tracking queen positions
             self.mark_attacks(row, col)
             return True
@@ -25,25 +22,30 @@ class ChessBoard:
 
     def mark_attacks(self, queen_row, queen_col):
         # Mark column
-        self.board[:, queen_col] = -1
+        for row in range(self.size):
+            self.board[row][queen_col] = -1
 
         # Mark row
-        self.board[queen_row, :] = -1
+        for col in range(self.size):
+            self.board[queen_row][col] = -1
 
         for i in range(-self.size, self.size):
             # Mark left diagonal
             if 0 <= queen_row + i < self.size and 0 <= queen_col + i < self.size:
-                self.board[queen_row + i, queen_col + i] = -1
+                self.board[queen_row + i][queen_col + i] = -1
             if 0 <= queen_row + i < self.size and 0 <= queen_col - i < self.size:
-                self.board[queen_row + i, queen_col - i] = -1
+                self.board[queen_row + i][queen_col - i] = -1
             # Mark right diagonal
             if 0 <= queen_row + i < self.size and 0 <= queen_col + i < self.size:
-                self.board[queen_row + i, queen_col + i] = -1
+                self.board[queen_row + i][queen_col + i] = -1
             if 0 <= queen_row + i < self.size and 0 <= queen_col - i < self.size:
-                self.board[queen_row + i, queen_col - i] = -1
+                self.board[queen_row + i][queen_col - i] = -1
+
+        # Reset the queen's position to 1 (since it was marked as -1 in the above loops)
+        self.board[queen_row][queen_col] = 1
 
     def is_safe(self, row, col):
-        return self.board[row, col] == 0
+        return self.board[row][col] == 0
 
 
 def solve_n_queens(size):
