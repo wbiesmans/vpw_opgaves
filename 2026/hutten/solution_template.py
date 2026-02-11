@@ -408,6 +408,37 @@ def construct_edge_list(graph):
     return sorted(edge_list, reverse=True)
 
 
+def solve_task_grow_circle(graph_matrix):
+    num_nodes = len(graph_matrix)
+    if num_nodes == 2:
+        return 2 * graph_matrix[0][1]
+    # Initialize with trivial case (3 nodes chain = fully connected = optimal):
+    # edge: tuple = (dist, node1, node2)
+    edges = [(graph_matrix[0][1], 0, 1), (graph_matrix[1][2], 1, 2), (graph_matrix[0][2], 0, 2)]
+    # nodes = [0, 1, 2]
+    # For each subsequent node to add to into the chain:
+    for next_node in range(3, num_nodes):
+        edge_to_replace = None
+        lowest_additional_distance = float("inf")
+        # Check which edge replacement leads to lowest additional distance (= )
+        additional_distance = [float("inf")] * len(edges)
+        for idx, (edge_dist, node1, node2) in enumerate(edges):
+            dist1 = graph_matrix[next_node][node1]  # new_edge1
+            dist2 = graph_matrix[next_node][node2]  # new_edge2
+            additional_distance[idx] = dist1 + dist2 - edge_dist
+            if additional_distance[idx] < lowest_additional_distance:
+                lowest_additional_distance = additional_distance[idx]
+                edge_to_replace = edges[idx]
+                new_edges = [(dist1, next_node, node1), (dist2, next_node, node2)]
+        edges.remove(edge_to_replace)
+        edges.extend(new_edges)
+
+    distances = [edge[0] for edge in edges]
+    total_distance = sum(distances)
+    logging.info(edges)
+    return total_distance
+
+
 graph_matrix = []
 if __name__ == "__main__":
     logger = logging.getLogger(__name__)
@@ -450,16 +481,17 @@ if __name__ == "__main__":
         graph_matrix = construct_graph(coordinates)
 
         # Start of processing
-        sorted_edge_list = construct_edge_list(graph_matrix)
-        edges = []
-        for edge_weight, node1, node2 in sorted_edge_list:
-            edges.append(Edge(node1, node2, edge_weight, bidirectional=False))
-            edges.append(Edge(node2, node1, edge_weight, bidirectional=False))
+        # sorted_edge_list = construct_edge_list(graph_matrix)
+        # edges = []
+        # for edge_weight, node1, node2 in sorted_edge_list:
+        # edges.append(Edge(node1, node2, edge_weight, bidirectional=False))
+        # edges.append(Edge(node2, node1, edge_weight, bidirectional=False))
 
-        graph = Graph(edges=edges)
+        # graph = Graph(edges=edges)
         # value = solve_task(sorted_edge_list, num_hutten)
-        value = graph.shortest_path(0, 0)[0]
-        # value = solve_task_per_node(graph)
+        # value = graph.shortest_path(0, 0)[0]
+        # value = solve_task_per_node(graph_matrix)
+        value = solve_task_grow_circle(graph_matrix)
         solution_str = f"{entry + 1} {value}"
 
         # Write to stdout
