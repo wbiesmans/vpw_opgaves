@@ -6,18 +6,19 @@ import typing
 
 
 def solve_task(table_amounts: typing.List, geld: typing.Tuple):  # coupure, aantal
-
+    geld = sorted(geld, reverse=True)
     for coupure, aantal_briefjes in geld:
         for i in range(aantal_briefjes):
-            tmp = [table - coupure for table in table_amounts if (table - coupure) > 0]
+            tmp = [table - coupure for table in table_amounts if (table - coupure) >= 0]
             if tmp:
                 table_amounts_min = min(tmp)
             else:
                 continue
 
-            for table_amount, idx in enumerate(table_amounts):
+            for idx, table_amount in enumerate(table_amounts):
                 if table_amount - coupure == table_amounts_min:
                     table_amounts[idx] -= coupure
+                    break
     exact = len([table_amount for table_amount in table_amounts if table_amount == 0])
     return exact
 
